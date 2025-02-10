@@ -120,45 +120,59 @@
     
     
 
-    <script>
-        const containers = document.querySelectorAll(".container");
-        let currentIndex = 0;
-        let startY = 0;
+   <script>
+    const containers = document.querySelectorAll(".container");
+    let currentIndex = 0;
+    let startY = 0;
+    let isScrolling = false;  // Variable para evitar múltiples desplazamientos al mismo tiempo
 
-        function showContainer(index) {
-            containers.forEach((container, i) => {
-                container.classList.toggle("active", i === index);
-            });
+    function showContainer(index) {
+        containers.forEach((container, i) => {
+            container.classList.toggle("active", i === index);
+        });
+    }
+
+    function handleScroll(event) {
+        if (isScrolling) return;  // Evita desplazamientos simultáneos
+        isScrolling = true;  // Bloquea el desplazamiento
+
+        if (event.deltaY > 0 && currentIndex < containers.length - 1) {
+            currentIndex++;
+        } else if (event.deltaY < 0 && currentIndex > 0) {
+            currentIndex--;
         }
 
-        function handleScroll(event) {
-            if (event.deltaY > 0 && currentIndex < containers.length - 1) {
+        showContainer(currentIndex);
+
+        setTimeout(() => isScrolling = false, 500);  // Permite desplazarse después de 500ms
+    }
+
+    function handleTouchStart(event) {
+        startY = event.touches[0].clientY;
+    }
+
+    function handleTouchMove(event) {
+        let endY = event.touches[0].clientY;
+        let deltaY = startY - endY;
+
+        if (Math.abs(deltaY) > 30 && !isScrolling) {  // Umbral reducido a 30px
+            if (deltaY > 0 && currentIndex < containers.length - 1) {
                 currentIndex++;
-            } else if (event.deltaY < 0 && currentIndex > 0) {
+            } else if (deltaY < 0 && currentIndex > 0) {
                 currentIndex--;
             }
+
             showContainer(currentIndex);
+            isScrolling = true;  // Evita desplazamientos múltiples
+            setTimeout(() => isScrolling = false, 500);  // Permite desplazarse después de 500ms
         }
+    }
 
-        function handleTouchStart(event) {
-            startY = event.touches[0].clientY;
-        }
+    window.addEventListener("wheel", handleScroll);
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove);
+</script>
 
-        function handleTouchMove(event) {
-            let endY = event.touches[0].clientY;
-            let deltaY = startY - endY;
-            if (deltaY > 50 && currentIndex < containers.length - 1) {
-                currentIndex++;
-            } else if (deltaY < -50 && currentIndex > 0) {
-                currentIndex--;
-            }
-            showContainer(currentIndex);
-        }
-
-        window.addEventListener("wheel", handleScroll);
-        window.addEventListener("touchstart", handleTouchStart);
-        window.addEventListener("touchmove", handleTouchMove);
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
