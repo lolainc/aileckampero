@@ -124,17 +124,20 @@
     const containers = document.querySelectorAll(".container");
     let currentIndex = 0;
     let startY = 0;
-    let isScrolling = false;  // Para evitar múltiples desplazamientos al mismo tiempo
+    let isScrolling = false;  // Para evitar desplazamientos simultáneos
 
+    // Función para mostrar la imagen actual
     function showContainer(index) {
         containers.forEach((container, i) => {
             container.classList.toggle("active", i === index);
         });
     }
 
+    // Control de desplazamiento con rueda
     function handleScroll(event) {
-        if (isScrolling) return;  // Evita desplazamientos simultáneos
-        isScrolling = true;  // Bloquea el desplazamiento
+        if (isScrolling) return;  // Bloquea el desplazamiento mientras se está procesando otro
+
+        isScrolling = true;  // Evita desplazamientos simultáneos
 
         if (event.deltaY > 0 && currentIndex < containers.length - 1) {
             currentIndex++;
@@ -144,9 +147,11 @@
 
         showContainer(currentIndex);
 
-        setTimeout(() => isScrolling = false, 800);  // Permite desplazarse después de 800ms para que sea más lento
+        // Espera para permitir que el siguiente desplazamiento sea reconocido
+        setTimeout(() => isScrolling = false, 1000);  // Permite desplazarse después de 1 segundo
     }
 
+    // Control de desplazamiento táctil
     function handleTouchStart(event) {
         startY = event.touches[0].clientY;
     }
@@ -155,7 +160,7 @@
         let endY = event.touches[0].clientY;
         let deltaY = startY - endY;
 
-        if (Math.abs(deltaY) > 20 && !isScrolling) {  // Reducir aún más el umbral a 20px para más suavidad
+        if (Math.abs(deltaY) > 40 && !isScrolling) {  // Reducir umbral a 40px
             if (deltaY > 0 && currentIndex < containers.length - 1) {
                 currentIndex++;
             } else if (deltaY < 0 && currentIndex > 0) {
@@ -163,15 +168,19 @@
             }
 
             showContainer(currentIndex);
-            isScrolling = true;  // Evita desplazamientos múltiples
-            setTimeout(() => isScrolling = false, 800);  // Espera más tiempo antes de permitir otro desplazamiento
+            isScrolling = true;
+
+            // Espera para permitir que el siguiente desplazamiento sea reconocido
+            setTimeout(() => isScrolling = false, 1000);  // Espera 1 segundo antes de permitir otro movimiento
         }
     }
 
+    // Eventos
     window.addEventListener("wheel", handleScroll);
     window.addEventListener("touchstart", handleTouchStart);
     window.addEventListener("touchmove", handleTouchMove);
 </script>
+
 
 
 
